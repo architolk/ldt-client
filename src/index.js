@@ -1,19 +1,51 @@
 import {SparqlEndpointFetcher} from "fetch-sparql-endpoint";
 
-function component() {
-  const element = document.createElement('div');
-
-  element.innerHTML = 'Results from the SPARQL query:';
-
-  return element;
+export function addNav() {
+  const nav = document.createElement('nav');
+  nav.className = 'navbar navbar-expand-lg bg-light';
+  nav.innerHTML = `
+  <div class="container-fluid">
+    <a class="navbar-brand" href="#">LDT Client</a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+        <li class="nav-item">
+          <a class="nav-link" href="types.html">Types</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="properties.html">Properties</a>
+        </li>
+      </ul>
+      <form class="d-flex" role="search" action="search.html">
+        <input class="form-control me-2" name="term" type="search" placeholder="Zoeken" aria-label="Zoeken">
+        <button class="btn btn-outline-success" type="submit">Zoeken</button>
+      </form>
+    </div>
+  </div>
+  `;
+  document.body.appendChild(nav);
 }
 
 function printData(table, bindings) {
   const row = table.insertRow();
 
   for (const variable in bindings) {
-    const cell = row.insertCell();
-    cell.innerHTML = bindings[variable].value;
+    if (!variable.match(/_label$/)) {
+      const cell = row.insertCell();
+      const binding = bindings[variable];
+      if (binding.termType=='NamedNode') {
+        const labelBinding = bindings[variable+"_label"];
+        var label = binding.value;
+        if (labelBinding) {
+          label = labelBinding.value;
+        }
+        cell.innerHTML = "<a href='nav_"+variable+".html?"+encodeURIComponent(binding.value)+"'>" + label + "</a>";
+      } else {
+        cell.innerHTML = binding.value;
+      }
+    }
   }
 }
 
@@ -21,23 +53,24 @@ function printHeader(table, variables) {
   const head = table.createTHead();
   const row = head.insertRow();
   variables.forEach( function (variable) {
-    const cell = row.appendChild(document.createElement("th"));
-    cell.innerHTML = variable.value;
+    if (!variable.value.match(/_label$/)) {
+      const cell = row.appendChild(document.createElement("th"));
+      cell.innerHTML = variable.value;
+    }
   })
 }
 
-async function fetchData() {
+var endpoint = "";
+
+export function setEndpoint(_endpoint) {
+  endpoint = _endpoint;
+}
+
+export async function fetchData(table, query) {
 
   const myFetcher = new SparqlEndpointFetcher();
 
-  const bindingsStream = await myFetcher.fetchBindings('https://dbpedia.org/sparql', 'SELECT * WHERE { ?s ?p ?o } LIMIT 100');
+  const bindingsStream = await myFetcher.fetchBindings(endpoint, query);
   bindingsStream.on('variables', (variables) => printHeader(table, variables));
   bindingsStream.on('data', (bindings) => printData(table, bindings));
 }
-
-document.body.appendChild(component());
-
-const table = document.createElement('table');
-document.body.appendChild(table);
-
-fetchData(table);
