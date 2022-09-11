@@ -1,11 +1,11 @@
 import {SparqlEndpointFetcher} from "fetch-sparql-endpoint";
 
-export function addNav(menu) {
+export function addNav(title, menu) {
   const nav = document.createElement('nav');
   nav.className = 'navbar navbar-expand-lg bg-light';
   var navhtml = `
   <div class="container-fluid">
-    <a class="navbar-brand" href="#">LDT Client</a>
+    <a class="navbar-brand" href="#">` + title + `</a>
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
     </button>
@@ -27,6 +27,33 @@ export function addNav(menu) {
   document.body.appendChild(nav);
 }
 
+function printTriple(table, subject,triple) {
+  console.log("test");
+  if (triple.s.value == subject) {
+    var row = document.getElementById(triple.p.value);
+    const keyterm = triple.p.value.replace(/^.+(#|\/)(.+)$/,"$2");
+    if (row) {
+      const valuecell = row.childNodes[1];
+      if (triple.o.termType == 'NamedNode') {
+        valuecell.innerHTML = valuecell.innerHTML + ", " + "<a href='nav_"+keyterm+".html?uri="+encodeURIComponent(triple.o.value)+"'>" + triple.o.value + "</a>";
+      } else {
+        valuecell.innerHTML = valuecell.innerHTML + ", " + triple.o.value;
+      }
+    } else {
+      row = table.insertRow();
+      row.id = triple.p.value;
+      const keycell = row.insertCell();
+      keycell.innerHTML = keyterm;
+      const valuecell = row.insertCell();
+      if (triple.o.termType == 'NamedNode') {
+        valuecell.innerHTML = "<a href='nav_"+keyterm+".html?uri="+encodeURIComponent(triple.o.value)+"'>" + triple.o.value + "</a>";
+      } else {
+        valuecell.innerHTML = triple.o.value;
+      }
+    }
+  }
+}
+
 function printData(table, bindings) {
   const row = table.insertRow();
 
@@ -40,7 +67,7 @@ function printData(table, bindings) {
         if (labelBinding) {
           label = labelBinding.value;
         }
-        cell.innerHTML = "<a href='nav_"+variable+".html?"+encodeURIComponent(binding.value)+"'>" + label + "</a>";
+        cell.innerHTML = "<a href='nav_"+variable+".html?uri="+encodeURIComponent(binding.value)+"'>" + label + "</a>";
       } else {
         cell.innerHTML = binding.value;
       }
@@ -72,4 +99,11 @@ export async function fetchData(table, query) {
   const bindingsStream = await myFetcher.fetchBindings(endpoint, query);
   bindingsStream.on('variables', (variables) => printHeader(table, variables));
   bindingsStream.on('data', (bindings) => printData(table, bindings));
+}
+
+export async function fetchTriples(table, subject, query) {
+
+  const myFetcher = new SparqlEndpointFetcher();
+  const tripleStream = await myFetcher.fetchBindings(endpoint, query);
+  tripleStream.on('data', (triple) => printTriple(table, subject, triple));
 }
