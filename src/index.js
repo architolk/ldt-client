@@ -1,9 +1,9 @@
 import {SparqlEndpointFetcher} from "fetch-sparql-endpoint";
 
-export function addNav() {
+export function addNav(menu) {
   const nav = document.createElement('nav');
   nav.className = 'navbar navbar-expand-lg bg-light';
-  nav.innerHTML = `
+  var navhtml = `
   <div class="container-fluid">
     <a class="navbar-brand" href="#">LDT Client</a>
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
@@ -11,12 +11,11 @@ export function addNav() {
     </button>
     <div class="collapse navbar-collapse" id="navbarSupportedContent">
       <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-        <li class="nav-item">
-          <a class="nav-link" href="types.html">Types</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="properties.html">Properties</a>
-        </li>
+  `;
+  for (const item in menu) {
+    navhtml = navhtml + '<li class="nav-item"><a class="nav-link" href="' + menu[item].toLowerCase() + '.html">' + menu[item] + '</a></li>\n';
+  }
+  nav.innerHTML = navhtml + `
       </ul>
       <form class="d-flex" role="search" action="search.html">
         <input class="form-control me-2" name="term" type="search" placeholder="Zoeken" aria-label="Zoeken">
