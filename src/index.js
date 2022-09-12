@@ -29,52 +29,52 @@ export function addNav(title, menu) {
   document.body.appendChild(nav);
 }
 
-function printTriple(table, subject,triple) {
-  if (triple.s.value == subject) {
-    var row = document.getElementById(triple.p.value);
-    var keyterm = labels.get(triple.p.value);
+function printTriple(table, subject, triple) {
+  if (triple._subject.value == subject) {
+    var row = document.getElementById(triple._predicate.value);
+    var keyterm = labels.get(triple._predicate.value);
     if (!keyterm) {
-      keyterm = triple.p.value.replace(/^.+(#|\/)(.+)$/,"$2");
+      keyterm = triple._predicate.value.replace(/^.+(#|\/)(.+)$/,"$2");
     }
     if (row) {
       const valuecell = row.childNodes[1];
-      if (triple.o.termType == 'NamedNode') {
-        var olabel = labels.get(triple.o.value);
+      if (triple._object.termType == 'NamedNode') {
+        var olabel = labels.get(triple._object.value);
         if (!olabel) {
-          olabel = triple.o.value;
+          olabel = triple._object.value;
         }
-        valuecell.innerHTML = valuecell.innerHTML + ", " + "<a name='"+triple.o.value+"' href='nav_"+keyterm+".html?uri="+encodeURIComponent(triple.o.value)+"'>" + olabel + "</a>";
+        valuecell.innerHTML = valuecell.innerHTML + ", " + "<a name='"+triple._object.value+"' href='nav_"+keyterm+".html?uri="+encodeURIComponent(triple._object.value)+"'>" + olabel + "</a>";
       } else {
-        valuecell.innerHTML = valuecell.innerHTML + ", " + triple.o.value;
+        valuecell.innerHTML = valuecell.innerHTML + ", " + triple._object.value;
       }
     } else {
       row = table.insertRow();
-      row.id = triple.p.value;
+      row.id = triple._predicate.value;
       const keycell = row.insertCell();
       keycell.innerHTML = keyterm;
       const valuecell = row.insertCell();
-      if (triple.o.termType == 'NamedNode') {
-        var olabel = labels.get(triple.o.value);
+      if (triple._object.termType == 'NamedNode') {
+        var olabel = labels.get(triple._object.value);
         if (!olabel) {
-          olabel = triple.o.value;
+          olabel = triple._object.value;
         }
-        valuecell.innerHTML = "<a name='"+triple.o.value+"' href='nav_"+keyterm+".html?uri="+encodeURIComponent(triple.o.value)+"'>" + olabel + "</a>";
+        valuecell.innerHTML = "<a name='"+triple._object.value+"' href='nav_"+keyterm+".html?uri="+encodeURIComponent(triple._object.value)+"'>" + olabel + "</a>";
       } else {
-        valuecell.innerHTML = triple.o.value;
+        valuecell.innerHTML = triple._object.value;
       }
     }
   }
-  if (triple.p.value=="http://www.w3.org/2000/01/rdf-schema#label") {
-    var row = document.getElementById(triple.s.value);
+  if (triple._predicate.value=="http://www.w3.org/2000/01/rdf-schema#label") {
+    var row = document.getElementById(triple._subject.value);
     if (row) {
-      row.childNodes[0].innerHTML = triple.o.value;
+      row.childNodes[0].innerHTML = triple._object.value;
     }
-    const objects = document.getElementsByName(triple.s.value);
+    const objects = document.getElementsByName(triple._subject.value);
     objects.forEach((obj) => {
-      obj.innerHTML = triple.o.value;
+      obj.innerHTML = triple._object.value;
     });
     //Add to map for further reference
-    labels.set(triple.s.value,triple.o.value);
+    labels.set(triple._subject.value,triple._object.value);
   }
 }
 
@@ -128,6 +128,6 @@ export async function fetchData(table, query) {
 export async function fetchTriples(table, subject, query) {
 
   const myFetcher = new SparqlEndpointFetcher();
-  const tripleStream = await myFetcher.fetchBindings(endpoint, query);
+  const tripleStream = await myFetcher.fetchTriples(endpoint, query);
   tripleStream.on('data', (triple) => printTriple(table, subject, triple));
 }
