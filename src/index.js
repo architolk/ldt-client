@@ -1,5 +1,7 @@
 import {SparqlEndpointFetcher} from "fetch-sparql-endpoint";
 
+const labels = new Map();
+
 export function addNav(title, menu) {
   const nav = document.createElement('nav');
   nav.className = 'navbar navbar-expand-lg bg-light';
@@ -28,14 +30,20 @@ export function addNav(title, menu) {
 }
 
 function printTriple(table, subject,triple) {
-  console.log("test");
   if (triple.s.value == subject) {
     var row = document.getElementById(triple.p.value);
-    const keyterm = triple.p.value.replace(/^.+(#|\/)(.+)$/,"$2");
+    var keyterm = labels.get(triple.p.value);
+    if (!keyterm) {
+      keyterm = triple.p.value.replace(/^.+(#|\/)(.+)$/,"$2");
+    }
     if (row) {
       const valuecell = row.childNodes[1];
       if (triple.o.termType == 'NamedNode') {
-        valuecell.innerHTML = valuecell.innerHTML + ", " + "<a href='nav_"+keyterm+".html?uri="+encodeURIComponent(triple.o.value)+"'>" + triple.o.value + "</a>";
+        var olabel = labels.get(triple.o.value);
+        if (!olabel) {
+          olabel = triple.o.value;
+        }
+        valuecell.innerHTML = valuecell.innerHTML + ", " + "<a name='"+triple.o.value+"' href='nav_"+keyterm+".html?uri="+encodeURIComponent(triple.o.value)+"'>" + olabel + "</a>";
       } else {
         valuecell.innerHTML = valuecell.innerHTML + ", " + triple.o.value;
       }
@@ -46,11 +54,27 @@ function printTriple(table, subject,triple) {
       keycell.innerHTML = keyterm;
       const valuecell = row.insertCell();
       if (triple.o.termType == 'NamedNode') {
-        valuecell.innerHTML = "<a href='nav_"+keyterm+".html?uri="+encodeURIComponent(triple.o.value)+"'>" + triple.o.value + "</a>";
+        var olabel = labels.get(triple.o.value);
+        if (!olabel) {
+          olabel = triple.o.value;
+        }
+        valuecell.innerHTML = "<a name='"+triple.o.value+"' href='nav_"+keyterm+".html?uri="+encodeURIComponent(triple.o.value)+"'>" + olabel + "</a>";
       } else {
         valuecell.innerHTML = triple.o.value;
       }
     }
+  }
+  if (triple.p.value=="http://www.w3.org/2000/01/rdf-schema#label") {
+    var row = document.getElementById(triple.s.value);
+    if (row) {
+      row.childNodes[0].innerHTML = triple.o.value;
+    }
+    const objects = document.getElementsByName(triple.s.value);
+    objects.forEach((obj) => {
+      obj.innerHTML = triple.o.value;
+    });
+    //Add to map for further reference
+    labels.set(triple.s.value,triple.o.value);
   }
 }
 

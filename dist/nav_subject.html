@@ -17,6 +17,6 @@
       const urlParams = new URLSearchParams(window.location.search);
       const subjecturi = urlParams.get('uri');
       document.getElementById("subjecturi").innerHTML = subjecturi;
-      rdflib.fetchTriples(document.getElementById("table1"), subjecturi, 'CONSTRUCT {<'+subjecturi+'> ?p ?o} WHERE { <'+subjecturi+'> ?p ?o }')</script>
+      rdflib.fetchTriples(document.getElementById("table1"), subjecturi, 'CONSTRUCT {<'+subjecturi+'> ?p ?o. ?p rdfs:label ?p_label. ?o rdfs:label ?o_label} WHERE { <'+subjecturi+'> ?p ?o OPTIONAL {?p rdfs:label ?p_label} OPTIONAL {?o rdfs:label ?o_label}}')</script>
   </body>
 </html>
