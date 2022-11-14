@@ -29,6 +29,38 @@ export function addNav(title, menu) {
   document.body.appendChild(nav);
 }
 
+function printTripleInTree(tree, bindings, table) {
+  var li = document.createElement('li');
+  var count = bindings['count'].value;
+  tree.appendChild(li);
+  if (count==0) {
+    li.innerHTML = bindings['label'].value + (count>0 ? " (" + count + ")" : "");
+    li.uri = bindings['uri'].value;
+    li.tablelink = table;
+    if (table!=null) {
+      li.onclick = function () {
+        var uri = this.uri;
+        this.tablelink.innerHTML="";
+        fetchTriples(this.tablelink,uri,'CONSTRUCT {<'+uri+'>?p?o} WHERE {<'+uri+'>?p?o}');
+      }
+    }
+  } else {
+    var details = document.createElement('details');
+    details.uri = bindings['uri'].value;
+    li.appendChild(details);
+    var summary = document.createElement('summary');
+    summary.innerHTML = bindings['label'].value + (count>0 ? " (" + count + ")" : "");
+    details.appendChild(summary);
+    details.tablelink = table;
+    details.onclick = function () {
+      var ul = document.createElement('ul');
+      this.appendChild(ul);
+      this.onclick = null;
+      fetchTreeTriples(ul,"SELECT ?uri (?uri as ?label) (count(distinct ?c) as ?count) WHERE {?uri rdfs:subClassOf <"+this.uri+"> OPTIONAL {?c rdfs:subClassOf ?uri}} GROUP BY ?uri",table);
+    }
+  }
+}
+
 function printTriple(table, subject, triple) {
   if (triple._subject.value == subject) {
     var row = document.getElementById(triple._predicate.value);
@@ -130,4 +162,18 @@ export async function fetchTriples(table, subject, query) {
   const myFetcher = new SparqlEndpointFetcher();
   const tripleStream = await myFetcher.fetchTriples(endpoint, query);
   tripleStream.on('data', (triple) => printTriple(table, subject, triple));
+}
+
+export async function fetchTree(tree, query) {
+
+  const myFetcher = new SparqlEndpointFetcher();
+  const bindingsStream = await myFetcher.fetchBindings(endpoint, query);
+  bindingsStream.on('data', (bindings) => printTripleInTree(tree, bindings, null));
+}
+
+export async function fetchTreeTriples(tree, query, table) {
+
+  const myFetcher = new SparqlEndpointFetcher();
+  const bindingsStream = await myFetcher.fetchBindings(endpoint, query);
+  bindingsStream.on('data', (bindings) => printTripleInTree(tree, bindings, table));
 }
