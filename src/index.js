@@ -45,7 +45,8 @@ function printTripleInTree(tree, branch, bindings) {
       anchor.onclick = function () {
         const uri = this.uri;
         this.treelink.tablelink.innerHTML="";
-        fetchTriples(this.treelink.tablelink,uri,this.treelink.subjectQuery.replaceAll("@URI@",uri),this.subjectlabel);
+        const query = (this.treelink.graphuri!=null) ? this.treelink.subjectQuery.replaceAll("@URI@",uri).replaceAll("@GRAPH@",this.treelink.graphuri) : this.treelink.subjectQuery.replaceAll("@URI@",uri);
+        fetchTriples(this.treelink.tablelink,uri,query,this.subjectlabel);
       }
     }
   } else {
@@ -64,7 +65,8 @@ function printTripleInTree(tree, branch, bindings) {
       anchor.onclick = function () {
         const uri = this.uri;
         this.treelink.tablelink.innerHTML="";
-        fetchTriples(this.treelink.tablelink,uri,this.treelink.subjectQuery.replaceAll("@URI@",uri),this.subjectlabel);
+        const query = (this.treelink.graphuri!=null) ? this.treelink.subjectQuery.replaceAll("@URI@",uri).replaceAll("@GRAPH@",this.treelink.graphuri) : this.treelink.subjectQuery.replaceAll("@URI@",uri);
+        fetchTriples(this.treelink.tablelink,uri,query.replaceAll("@URI@",uri),this.subjectlabel);
       }
     }
     details.uri = bindings['uri'].value;
