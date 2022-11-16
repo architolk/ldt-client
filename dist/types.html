@@ -19,7 +19,7 @@
       </div>
     </div>
     <script>
-      rdflib.fetchTreeTriples(document.getElementById("tree1"),"http://www.w3.org/2000/01/rdf-schema#subClassOf","http://www.w3.org/2000/01/rdf-schema#label",document.getElementById("table1"),"CONSTRUCT {<@URI@>?p?o} WHERE {<@URI@>?p?o}");
+      rdflib.fetchTreeTriples(document.getElementById("tree1"),"http://dbpedia.org/resource/classes#","http://www.w3.org/2002/07/owl#Class","http://www.w3.org/2000/01/rdf-schema#subClassOf","http://www.w3.org/2000/01/rdf-schema#label",document.getElementById("table1"),"CONSTRUCT {<@URI@>?p?o} WHERE {<@URI@>?p?o}");
     </script>
     </body>
 </html>

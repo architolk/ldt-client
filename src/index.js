@@ -34,38 +34,51 @@ function printTripleInTree(tree, branch, bindings) {
   var count = bindings['count'].value;
   branch.appendChild(li);
   if (count==0) {
-    li.innerHTML = bindings['label'].value + (count>0 ? " (" + count + ")" : "");
-    li.uri = bindings['uri'].value;
-    li.subjectlabel = bindings['label'].value;
-    li.treelink = tree;
+    const anchor = document.createElement('a');
+    anchor.href = "#";
+    anchor.uri = bindings['uri'].value;
+    anchor.subjectlabel = bindings['label'].value;
+    anchor.treelink = tree;
+    li.appendChild(anchor);
+    anchor.innerHTML = bindings['label'].value + (count>0 ? " (" + count + ")" : "");
     if (tree.tablelink!=null) {
-      li.onclick = function () {
+      anchor.onclick = function () {
         const uri = this.uri;
         this.treelink.tablelink.innerHTML="";
         fetchTriples(this.treelink.tablelink,uri,this.treelink.subjectQuery.replaceAll("@URI@",uri),this.subjectlabel);
       }
     }
   } else {
-    var details = document.createElement('details');
+    const details = document.createElement('details');
     li.appendChild(details);
-    var summary = document.createElement('summary');
-    summary.innerHTML = bindings['label'].value + (count>0 ? " (" + count + ")" : "");
+    const summary = document.createElement('summary');
     details.appendChild(summary);
-    details.uri = bindings['uri'].value;
-    details.subjectlabel = bindings['label'].value;
-    details.treelink = tree;
-    details.onclick = function () {
-      const ul = document.createElement('ul');
-      this.appendChild(ul);
-      this.onclick = function () {
+    const anchor = document.createElement("a");
+    summary.appendChild(anchor);
+    anchor.href="#";
+    anchor.innerHTML = bindings['label'].value + (count>0 ? " (" + count + ")" : "");
+    if (tree.tablelink!=null) {
+      anchor.uri = bindings['uri'].value;
+      anchor.subjectlabel = bindings['label'].value;
+      anchor.treelink = tree;
+      anchor.onclick = function () {
         const uri = this.uri;
         this.treelink.tablelink.innerHTML="";
         fetchTriples(this.treelink.tablelink,uri,this.treelink.subjectQuery.replaceAll("@URI@",uri),this.subjectlabel);
       }
+    }
+    details.uri = bindings['uri'].value;
+    details.treelink = tree;
+    details.onclick = function () {
+      const ul = document.createElement('ul');
+      this.appendChild(ul);
+      this.onclick = null;
       const uri = this.uri;
+      const typeuri = this.treelink.typeuri;
       const reluri = this.treelink.reluri;
       const labeluri = this.treelink.labeluri;
-      fetchTree(this.treelink,ul,"SELECT ?uri ?label (count(distinct ?c) as ?count) WHERE {?uri <"+reluri+"> <"+uri+">. ?uri <"+labeluri+"> ?label OPTIONAL {?c <"+reluri+"> ?uri}} GROUP BY ?uri ?label ORDER BY ?label");
+      const graphstr = (this.treelink.graphuri!=null) ? "GRAPH <"+this.treelink.graphuri+">" : "";
+      fetchTree(this.treelink,ul,"SELECT ?uri (min(?lbl) as ?label) (count(distinct ?c) as ?count) WHERE {"+graphstr+"{?uri <"+reluri+"> <"+uri+">. ?uri a <"+typeuri+">. ?uri <"+labeluri+"> ?lbl OPTIONAL {?c <"+reluri+"> ?uri}}} GROUP BY ?uri ORDER BY ?label");
     }
   }
 }
@@ -189,11 +202,14 @@ export async function fetchTree(tree, branch, query) {
   bindingsStream.on('data', (bindings) => printTripleInTree(tree, branch, bindings));
 }
 
-export async function fetchTreeTriples(tree, reluri, labeluri , table, subjectQuery) {
+export async function fetchTreeTriples(tree, graphuri, typeuri, reluri, labeluri , table, subjectQuery) {
 
   const myFetcher = new SparqlEndpointFetcher();
-  var query = "SELECT ?uri ?label (count(distinct ?c) as ?count) WHERE {?c <"+reluri+"> ?uri. ?uri <"+labeluri+"> ?label FILTER NOT EXISTS {?uri <"+reluri+"> ?p}} GROUP BY ?uri ?label ORDER BY ?label";
+  const graphstr = (graphuri!=null) ? "GRAPH <"+graphuri+">" : "";
+  const query = "SELECT ?uri (min(?lbl) as ?label) (count(distinct ?c) as ?count) WHERE {"+graphstr+"{?uri a <"+typeuri+">. ?uri <"+labeluri+"> ?lbl FILTER NOT EXISTS {?uri <"+reluri+"> ?p. ?p a <"+typeuri+">} OPTIONAL {?c <"+reluri+"> ?uri}}} GROUP BY ?uri ORDER BY ?label";
   const bindingsStream = await myFetcher.fetchBindings(endpoint, query);
+  tree.graphuri = graphuri;
+  tree.typeuri = typeuri;
   tree.reluri = reluri;
   tree.labeluri = labeluri;
   tree.tablelink = table;
