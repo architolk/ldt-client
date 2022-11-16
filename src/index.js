@@ -36,12 +36,13 @@ function printTripleInTree(tree, branch, bindings) {
   if (count==0) {
     li.innerHTML = bindings['label'].value + (count>0 ? " (" + count + ")" : "");
     li.uri = bindings['uri'].value;
+    li.subjectlabel = bindings['label'].value;
     li.treelink = tree;
     if (tree.tablelink!=null) {
       li.onclick = function () {
         const uri = this.uri;
         this.treelink.tablelink.innerHTML="";
-        fetchTriples(this.treelink.tablelink,uri,this.treelink.subjectQuery.replaceAll("@URI@",uri));
+        fetchTriples(this.treelink.tablelink,uri,this.treelink.subjectQuery.replaceAll("@URI@",uri),this.subjectlabel);
       }
     }
   } else {
@@ -51,6 +52,7 @@ function printTripleInTree(tree, branch, bindings) {
     summary.innerHTML = bindings['label'].value + (count>0 ? " (" + count + ")" : "");
     details.appendChild(summary);
     details.uri = bindings['uri'].value;
+    details.subjectlabel = bindings['label'].value;
     details.treelink = tree;
     details.onclick = function () {
       const ul = document.createElement('ul');
@@ -58,7 +60,7 @@ function printTripleInTree(tree, branch, bindings) {
       this.onclick = function () {
         const uri = this.uri;
         this.treelink.tablelink.innerHTML="";
-        fetchTriples(this.treelink.tablelink,uri,this.treelink.subjectQuery.replaceAll("@URI@",uri));
+        fetchTriples(this.treelink.tablelink,uri,this.treelink.subjectQuery.replaceAll("@URI@",uri),this.subjectlabel);
       }
       const uri = this.uri;
       const reluri = this.treelink.reluri;
@@ -164,7 +166,16 @@ export async function fetchData(table, query) {
   bindingsStream.on('data', (bindings) => printData(table, bindings));
 }
 
-export async function fetchTriples(table, subject, query) {
+export async function fetchTriples(table, subject, query, label) {
+
+  console.log(label);
+  if (label!=null) {
+    const head = table.createTHead();
+    const row = head.insertRow();
+    const cell = row.appendChild(document.createElement("th"));
+    cell.colSpan = "2";
+    cell.innerHTML = label;
+  }
 
   const myFetcher = new SparqlEndpointFetcher();
   const tripleStream = await myFetcher.fetchTriples(endpoint, query);
