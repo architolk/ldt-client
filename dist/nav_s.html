@@ -11,12 +11,14 @@
   <body>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-u1OknCvxWvY5kfmNBILK2hRnQC3Pr17a+RTT6rIHI7NnikvbZlHgTPOOmMi466C8" crossorigin="anonymous"></script>
     <script>rdflib.addNav("LDT Client",["Types","Properties"])</script>
-    <h1>Properties of: <i id="subjecturi"></i></h1>
+    <h1>Properties of: <i id="subjecturi"></i> @ <i id="graphuri"></i></h1>
     <table class="table" id="table1"/>
     <script>
       const urlParams = new URLSearchParams(window.location.search);
       const subjecturi = urlParams.get('uri');
+      const graphuri = urlParams.get('graph');
       document.getElementById("subjecturi").innerHTML = subjecturi;
-      rdflib.fetchTriples(document.getElementById("table1"), subjecturi, 'CONSTRUCT {<'+subjecturi+'> ?p ?o. ?p rdfs:label ?p_label. ?o rdfs:label ?o_label} WHERE { <'+subjecturi+'> ?p ?o OPTIONAL {?p rdfs:label ?p_label} OPTIONAL {?o rdfs:label ?o_label}}',null)</script>
+      document.getElementById("graphuri").innerHTML = graphuri;
+      rdflib.fetchTriples(document.getElementById("table1"), subjecturi, 'CONSTRUCT {<'+subjecturi+'> ?p ?o. ?p rdfs:label ?p_label. ?o rdfs:label ?o_label} WHERE { GRAPH <'+graphuri+'> {<'+subjecturi+'> ?p ?o OPTIONAL {?p rdfs:label ?p_label} OPTIONAL {?o rdfs:label ?o_label}}}',null)</script>
   </body>
 </html>

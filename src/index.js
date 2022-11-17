@@ -138,7 +138,7 @@ function printData(table, bindings) {
   const row = table.insertRow();
 
   for (const variable in bindings) {
-    if (!variable.match(/_label$/)) {
+    if ((!variable.match(/_label$/)) && (!variable.match(/^graph$/))) {
       const cell = row.insertCell();
       const binding = bindings[variable];
       if (binding.termType=='NamedNode') {
@@ -147,7 +147,9 @@ function printData(table, bindings) {
         if (labelBinding) {
           label = labelBinding.value;
         }
-        cell.innerHTML = "<a href='nav_"+variable+".html?uri="+encodeURIComponent(binding.value)+"'>" + label + "</a>";
+        const graphbinding = bindings["graph"];
+        const graphstr = (graphbinding ? "graph="+encodeURIComponent(graphbinding.value)+"&" : "");
+        cell.innerHTML = "<a href='nav_"+variable+".html?"+graphstr+"uri="+encodeURIComponent(binding.value)+"'>" + label + "</a>";
       } else {
         cell.innerHTML = binding.value;
       }
@@ -159,7 +161,7 @@ function printHeader(table, variables) {
   const head = table.createTHead();
   const row = head.insertRow();
   variables.forEach( function (variable) {
-    if (!variable.value.match(/_label$/)) {
+    if ((!variable.value.match(/_label$/)) && (!variable.value.match(/^graph$/))) {
       const cell = row.appendChild(document.createElement("th"));
       cell.innerHTML = variable.value;
     }
@@ -183,7 +185,6 @@ export async function fetchData(table, query) {
 
 export async function fetchTriples(table, subject, query, label) {
 
-  console.log(label);
   if (label!=null) {
     const head = table.createTHead();
     const row = head.insertRow();
