@@ -19,6 +19,6 @@
       const graphuri = urlParams.get('graph');
       document.getElementById("subjecturi").innerHTML = subjecturi;
       document.getElementById("graphuri").innerHTML = graphuri;
-      rdflib.fetchTriples(document.getElementById("table1"), subjecturi, 'CONSTRUCT {<'+subjecturi+'> ?p ?o. ?p rdfs:label ?p_label. ?o rdfs:label ?o_label} WHERE { GRAPH <'+graphuri+'> {<'+subjecturi+'> ?p ?o OPTIONAL {?p rdfs:label ?p_label} OPTIONAL {?o rdfs:label ?o_label}}}',graphuri)</script>
+      rdflib.fetchTriples(document.getElementById("table1"), subjecturi, 'CONSTRUCT {<'+subjecturi+'> ?p ?o. ?p rdfs:label ?p_label. ?o rdfs:label ?o_label} WHERE { GRAPH ?g {<'+subjecturi+'> ?p ?o OPTIONAL {?p rdfs:label ?p_label} OPTIONAL {?o rdfs:label ?o_label}}}',null,graphuri)</script>
   </body>
 </html>

@@ -45,8 +45,9 @@ function printTripleInTree(tree, branch, bindings) {
       anchor.onclick = function () {
         const uri = this.uri;
         this.treelink.tablelink.innerHTML="";
+        this.treelink.tablelink.graphuri = this.treelink.graphuri;
         const query = (this.treelink.graphuri!=null) ? this.treelink.subjectQuery.replaceAll("@URI@",uri).replaceAll("@GRAPH@",this.treelink.graphuri) : this.treelink.subjectQuery.replaceAll("@URI@",uri);
-        fetchTriples(this.treelink.tablelink,uri,query,this.subjectlabel);
+        fetchTriples(this.treelink.tablelink,uri,query,this.subjectlabel,this.treelink.graphuri);
       }
     }
   } else {
@@ -66,7 +67,7 @@ function printTripleInTree(tree, branch, bindings) {
         const uri = this.uri;
         this.treelink.tablelink.innerHTML="";
         const query = (this.treelink.graphuri!=null) ? this.treelink.subjectQuery.replaceAll("@URI@",uri).replaceAll("@GRAPH@",this.treelink.graphuri) : this.treelink.subjectQuery.replaceAll("@URI@",uri);
-        fetchTriples(this.treelink.tablelink,uri,query.replaceAll("@URI@",uri),this.subjectlabel);
+        fetchTriples(this.treelink.tablelink,uri,query.replaceAll("@URI@",uri),this.subjectlabel,this.treelink.graphuri);
       }
     }
     details.uri = bindings['uri'].value;
@@ -87,6 +88,15 @@ function printTripleInTree(tree, branch, bindings) {
 
 function printTriple(table, subject, triple) {
   if (triple._subject.value == subject) {
+    if (triple._predicate.value == "http://www.w3.org/2000/01/rdf-schema#label") {
+      if (!table.tHead) {
+        const head = table.createTHead();
+        const row = head.insertRow();
+        const cell = row.appendChild(document.createElement("th"));
+        cell.colSpan = "2";
+        cell.innerHTML = triple._object.value;
+      }
+    }
     var row = document.getElementById(triple._predicate.value);
     var keyterm = labels.get(triple._predicate.value);
     if (!keyterm) {
@@ -99,12 +109,19 @@ function printTriple(table, subject, triple) {
         if (!olabel) {
           olabel = triple._object.value;
         }
-        valuecell.innerHTML = valuecell.innerHTML + ", " + "<a name='"+triple._object.value+"' href='nav_"+keyterm+".html?uri="+encodeURIComponent(triple._object.value)+"'>" + olabel + "</a>";
+        const graphstr = (table.graphuri!=null ? "graph="+encodeURIComponent(table.graphuri)+"&" : "");
+        valuecell.innerHTML = valuecell.innerHTML + ", " + "<a name='"+triple._object.value+"' href='nav_"+keyterm+".html?"+graphstr+"uri="+encodeURIComponent(triple._object.value)+"'>" + olabel + "</a>";
       } else {
         valuecell.innerHTML = valuecell.innerHTML + ", " + triple._object.value;
       }
     } else {
-      row = table.insertRow();
+      var tbody;
+      if (table.tBodies.length==0) {
+        tbody = table.createTBody();
+      } else {
+        tbody = table.tBodies[0];
+      }
+      row = tbody.insertRow();
       row.id = triple._predicate.value;
       const keycell = row.insertCell();
       keycell.innerHTML = keyterm;
@@ -114,7 +131,8 @@ function printTriple(table, subject, triple) {
         if (!olabel) {
           olabel = triple._object.value;
         }
-        valuecell.innerHTML = "<a name='"+triple._object.value+"' href='nav_"+keyterm+".html?uri="+encodeURIComponent(triple._object.value)+"'>" + olabel + "</a>";
+        const graphstr = (table.graphuri!=null ? "graph="+encodeURIComponent(table.graphuri)+"&" : "");
+        valuecell.innerHTML = "<a name='"+triple._object.value+"' href='nav_"+keyterm+".html?"+graphstr+"uri="+encodeURIComponent(triple._object.value)+"'>" + olabel + "</a>";
       } else {
         valuecell.innerHTML = triple._object.value;
       }
@@ -135,7 +153,13 @@ function printTriple(table, subject, triple) {
 }
 
 function printData(table, bindings) {
-  const row = table.insertRow();
+  var tbody;
+  if (table.tBodies.length==0) {
+    tbody = table.createTBody();
+  } else {
+    tbody = table.tBodies[0];
+  }
+  const row = tbody.insertRow();
 
   for (const variable in bindings) {
     if ((!variable.match(/_label$/)) && (!variable.match(/^graph$/))) {
@@ -183,8 +207,9 @@ export async function fetchData(table, query) {
   bindingsStream.on('data', (bindings) => printData(table, bindings));
 }
 
-export async function fetchTriples(table, subject, query, label) {
+export async function fetchTriples(table, subject, query, label, graph) {
 
+  table.graphuri = graph;
   if (label!=null) {
     const head = table.createTHead();
     const row = head.insertRow();
