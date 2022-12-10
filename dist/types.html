@@ -6,7 +6,7 @@
     <title>LDT Client</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-iYQeCzEYFbKjA/T2uDLTpkwGzCiq6soy8tYaI1GyVh/UjpbCx/TYkiZhlZB6+fzT" crossorigin="anonymous">
     <link href="tree.css" rel="stylesheet">
-    <script src="main.js"></script>
+    <script src="rdflib.js"></script>
     <script>rdflib.setEndpoint('https://dbpedia.org/sparql')</script>
     </head>
   <body>
@@ -19,7 +19,10 @@
       </div>
     </div>
     <script>
-      rdflib.fetchTreeTriples(document.getElementById("tree1"),"http://dbpedia.org/resource/classes#","http://www.w3.org/2002/07/owl#Class","http://www.w3.org/2000/01/rdf-schema#subClassOf","http://www.w3.org/2000/01/rdf-schema#label",document.getElementById("table1"),"CONSTRUCT {<@URI@>?p?o} WHERE {<@URI@>?p?o}");
+      const graphuri="http://dbpedia.org/resource/classes#";
+      const classuri="http://www.w3.org/2002/07/owl#Class";
+      const propuri="http://www.w3.org/2000/01/rdf-schema#subClassOf";
+      rdflib.fetchTree(document.getElementById("tree1"),document.getElementById("table1"),"CONSTRUCT {<@URI@> ?p ?o. ?p rdfs:label ?p_label. ?o rdfs:label ?o_label} WHERE { GRAPH <@GRAPH@> {<@URI@> ?p ?o OPTIONAL {?p rdfs:label ?p_label} OPTIONAL {?o rdfs:label ?o_label}}}",{graph:graphuri,class:classuri,upper:propuri})
     </script>
     </body>
 </html>

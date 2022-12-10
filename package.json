@@ -25,7 +25,10 @@
     "webpack-dev-server": "^4.9.3"
   },
   "dependencies": {
+    "dagre": "^0.8.5",
     "fetch-sparql-endpoint": "^3.0.0",
+    "graphlib": "^2.1.8",
+    "jointjs": "^3.6.2",
     "node-polyfill-webpack-plugin": "^2.0.0"
   }
 }

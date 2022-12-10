@@ -9,7 +9,7 @@ module.exports = {
     static: './dist',
   },
   output: {
-    filename: 'main.js',
+    filename: 'rdflib.js',
     path: path.resolve(__dirname, 'dist'),
     libraryTarget: 'var',
     library: 'rdflib'
