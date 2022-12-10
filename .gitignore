@@ -61,4 +61,4 @@ typings/
 .next
 
 # Webpack bundle
-dist/main.js
+dist/rdflib.js
