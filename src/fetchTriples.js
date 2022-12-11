@@ -4,6 +4,7 @@ import * as helperModule from "./helpers.js";
 
 const labels = new Map();
 const links = new Map();
+const graphs = new Map();
 
 function printHeader(table,title) {
   if (title) {
@@ -18,8 +19,16 @@ function printHeader(table,title) {
 }
 
 function getHRef(uri,link,graph) {
-  const graphstr = ((graph) ? "graph="+encodeURIComponent(graph)+"&" : "");
-  return "nav_"+link+".html?"+graphstr+"uri="+encodeURIComponent(uri)
+  var olink = links.get(uri); //By default the link is the predicate, but if defined otherwise, use defined link
+  if (!olink) {
+    olink = link;
+  }
+  var ograph = graphs.get(uri); //By default the graph is the given graph, but if defined otherwise, use defined graph
+  if (!ograph) {
+    ograph = graph;
+  }
+  const graphstr = ((ograph) ? "graph="+encodeURIComponent(ograph)+"&" : "");
+  return "nav_"+olink+".html?"+graphstr+"uri="+encodeURIComponent(uri)
 }
 
 function getValue(object,link,graph) {
@@ -28,12 +37,7 @@ function getValue(object,link,graph) {
     if (!olabel) {
       olabel = object.value;
     }
-    var olink = links.get(object.value); //By default the link is the predicate, but if defined otherwise, use defined link
-    if (!olink) {
-      olink = link;
-    }
-    const graphstr = ((graph) ? "graph="+encodeURIComponent(graph)+"&" : "");
-    return "<a name='"+object.value+"' href='"+getHRef(object.value,olink,graph)+"'>" + olabel + "</a>"
+    return "<a name='"+object.value+"' href='"+getHRef(object.value,link,graph)+"'>" + olabel + "</a>"
   } else {
     return object.value
   }
@@ -58,8 +62,23 @@ export async function fetchTriples(table, query, params) {
 }
 
 function printTriple(table, triple, params) {
-  //We will only print triples for the selected subject, all other triples are used for other purposes (like labes of objects)
-  if (triple._subject.value == params.uri) {
+  // The 'special' predicates will be ignored, even if its subject is the one we are looking for
+  if (triple._predicate.value=="urn:ldt:link") {
+    const objects = document.getElementsByName(triple._subject.value); //All anchors (<a href>) to a particular uri
+    objects.forEach((obj) => {
+      obj.href = getHRef(triple._subject.value,triple._object.value,params.graph); //Change the label of the link to the actual label of the uri
+    });
+    //Add to map for further reference (so we will directly use the correct link, instead of the predicate)
+    links.set(triple._subject.value,triple._object.value);
+  } else if (triple._predicate.value=="urn:ldt:graph") {
+    const objects = document.getElementsByName(triple._subject.value); //All anchors (<a href>) to a particular uri
+    objects.forEach((obj) => {
+      const olink = obj.href.replace(/^.*nav_(.+).html.*$/,"$1"); //Specific case: we need to find the original link again...
+      obj.href = getHRef(triple._subject.value,olink,triple._object.value); //Change the graph of the link to the actual graph of the uri
+    });
+    //Add to map for further reference (so we will directly use the correct graph, instead of the param graph)
+    graphs.set(triple._subject.value,triple._object.value);
+  } else if (triple._subject.value == params.uri) { //We will only print triples for the selected subject, all other triples are used for other purposes (like labes of objects)
     if (triple._predicate.value == "http://www.w3.org/2000/01/rdf-schema#label") {
       printHeader(table,triple._object.value)
     }
@@ -103,13 +122,5 @@ function printTriple(table, triple, params) {
     });
     //Add to map for further reference (so we will directly use the correct label, instead of the uri itself)
     labels.set(triple._subject.value,triple._object.value);
-  }
-  if (triple._predicate.value=="urn:ldt:link") {
-    const objects = document.getElementsByName(triple._subject.value); //All anchors (<a href>) to a particular uri
-    objects.forEach((obj) => {
-      obj.href = getHRef(triple._subject.value,triple._object.value,params.graph); //Change the label of the link to the actual label of the uri
-    });
-    //Add to map for further reference (so we will directly use the correct link, instead of the predicate)
-    links.set(triple._subject.value,triple._object.value);
   }
 }

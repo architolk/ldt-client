@@ -43,6 +43,8 @@ Copy all files from the [/dist](dist) folder (after the build is completed) to t
 - fetchTriples(DOMElement,query,params)
   - DOMElement: the table in which the data is presented.
   - query: CONSTRUCT-query string. May contain parameters, like `@URI@`
+    - a triple with predicate `urn:ldt:link` can be used for an alternative href for the object (default is the predicate localname of the original triple)
+    - a triple with predicate `urn:ldt:graph` can be used for an alternative graph reference (default is the graph of the whole form)
   - parameters: JSON object containing parameters, for example: `{uri:'urn:foo'}`
     - The `uri` parameter is mandatory (this is the subject of the table)
     - A parameter `label` might contain the label of the subject
@@ -55,3 +57,14 @@ Copy all files from the [/dist](dist) folder (after the build is completed) to t
     - a parameter `upper` is used for the property higher in the tree
     - a parameter `lower` is used for the property lower in the tree (one of these should be present)
     - a parameter `class` can be used to filter the objects in the list
+    - a parameter `uri` can be used for the top element of the tree. If no uri is given, all elements without a parent are shown in te tree.
+- createDiagram(DOMElement,query,parameter)
+  - DOMElement: the canvas to draw the diagram on. The canvas will be the full width and height of the parent DOM element.
+  - query: CONSTRUCT query to create the diagram elements. Diagram elements will be placed in the middle of the canvas.
+    - By default any subject or object is displayed as an ellipse (using the localname as label) and any predicate as a link
+    - A predicate `urn:dia:classname` can be used to display a class rectangle with the corresponding name
+    - A predicate `urn:dia:attribute` can be used to display an attribute in a class rectangle
+    - A predicate `urn:dia:relname` can be used to display a link with the corresponding name
+    - A predicate `urn:dia:source` can be used to set the source of the link
+    - A predicate `urn:dia:target` can be used to set the target of the link
+  - parameters: JSON object containing parameters, for example `{graph:'urn:foo'}`

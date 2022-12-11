@@ -17,6 +17,6 @@
       const urlParams = new URLSearchParams(window.location.search);
       const term = urlParams.get('term').replace(/[^a-zA-Z0-9\s]/g,'');
       document.getElementById("searchterm").innerHTML = term;
-      rdflib.fetchData(document.getElementById("table1"), 'SELECT * WHERE { ?subject rdfs:label ?subject_label FILTER(REGEX(?subject_label,"@TERM@")) } LIMIT 100',{term: term})</script>
+      rdflib.fetchData(document.getElementById("table1"), 'SELECT * WHERE { GRAPH ?_graph {?s rdfs:label ?s_label FILTER(REGEX(?s_label,"@TERM@")) }} LIMIT 100',{term: term})</script>
   </body>
 </html>

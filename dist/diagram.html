@@ -12,10 +12,11 @@
   <body>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-u1OknCvxWvY5kfmNBILK2hRnQC3Pr17a+RTT6rIHI7NnikvbZlHgTPOOmMi466C8" crossorigin="anonymous"></script>
     <script>rdflib.addNav("LDT Client",["Types","Diagram"])</script>
-    <div id="diagram" style="width:1200px; height:900px"></div>
+    <div style="width:100%; height:300px"><div id="diagram1"/></div>
+    <div style="width:100%; height:300px"><div id="diagram2"/></div>
     <script>
-      //rdflib.createDiagram(document.getElementById("diagram"),"construct {?s?p?o} where {graph <http://dbpedia.org> {?p rdfs:domain ?s.?p rdfs:range ?o.?s a owl:Class.?o a owl:Class FILTER(?s=<http://dbpedia.org/ontology/Person>)}}");
-      rdflib.createDiagram(document.getElementById("diagram"),"CONSTRUCT {<http://doei> <http://blub> <http://huh>. <http://doei> <http://direct> <http://doei>} WHERE {}");
+      rdflib.createDiagram(document.getElementById("diagram1"),"CONSTRUCT {<http://doei> <http://blub> <http://huh>. <http://doei> <http://direct> <http://doei>} WHERE {}");
+      rdflib.createDiagram(document.getElementById("diagram2"),"CONSTRUCT {<http://link> <urn:dia:relname> 'relatie'; <urn:dia:source> <http://blub>; <urn:dia:target> <http://doei>. <http://blub> <urn:dia:classname> 'BlubKlasse'; <urn:dia:attribute> 'attribute 1'. <http://doei> <urn:dia:classname> 'DoeiKlasse'; <urn:dia:attribute> 'attribute 1'; <urn:dia:attribute> 'attribute 2'; <urn:dia:attribute> 'attribute blub'; <urn:dia:attribute> 'attribute 4'} WHERE {}");
     </script>
   </body>
 </html>
