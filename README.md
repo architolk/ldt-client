@@ -36,6 +36,11 @@ Copy all files from the [/dist](dist) folder (after the build is completed) to t
 
 ## API
 
+- fetchValue(value,query,params,callback)
+  - value: the value that is returned to the callback OR `null`, in which case the query is executed to fetch the value
+  - query: SELECT-query string. May contain parameters, like `@GRAPH@`
+  - parameters: JSON object containing parameters, for example: `{graph:'urn:foo'}`
+  - callback: a function with one parameter that will contain the value, typically something like: `(value) => {console.log(value)}`
 - fetchData(DOMElement,query,params)
   - DOMElement: the table in which the data is presented.
   - query: SELECT-query string. May contain parameters, like `@GRAPH@`

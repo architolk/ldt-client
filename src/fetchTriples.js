@@ -107,7 +107,7 @@ function printTriple(table, triple, params) {
         keycell.innerHTML = keyterm; //Label of the predicate is the localname of the prediate (at first)
       }
       const valuecell = row.insertCell();
-      valuecell.innerHTML = valuecell.innerHTML + ", " + getValue(triple._object,keyterm,params.graph);
+      valuecell.innerHTML = getValue(triple._object,keyterm,params.graph);
     }
   }
   //Process other triples that are found
