@@ -62,6 +62,7 @@ Copy all files from the [/dist](dist) folder (after the build is completed) to t
     - a parameter `upper` is used for the property higher in the tree
     - a parameter `lower` is used for the property lower in the tree (one of these should be present)
     - a parameter `class` can be used to filter the objects in the list
+    - a parameter `types` can be used to create subtrees per type. This is an array of classes that are use for each individual subtree.
     - a parameter `uri` can be used for the top element of the tree. If no uri is given, all elements without a parent are shown in te tree.
 - createDiagram(DOMElement,query,parameter)
   - DOMElement: the canvas to draw the diagram on. The canvas will be the full width and height of the parent DOM element.

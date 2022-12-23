@@ -3,11 +3,38 @@ import * as endpointModule from "./endpoint.js";
 import * as fetchTriplesModule from './fetchTriples.js';
 
 export async function fetchTree(tree, table, query, params) {
-  //We need to transfer the context (table, query, params) to the tree, because actions on the tree cannot use the context via the async functions
-  tree.tablelink = table;
-  tree.query = query;
-  tree.params = params;
-  fetchBranch(tree, tree);
+
+  if (params.types) {
+    params.types.forEach((type) => {
+      const li = document.createElement('li');
+      tree.appendChild(li);
+      const details = document.createElement('details');
+      li.appendChild(details);
+      const summary = document.createElement('summary');
+      details.appendChild(summary);
+      summary.innerHTML = type.replace(/^.+(#|\/)(.+)$/,"$2");
+      //We need to transfer the context (table, query, params) to the subtree, because actions on the tree cannot use the context via the async functions
+      li.tablelink = table;
+      li.query = query;
+      li.params = Object.assign({},params); //Copy of the params, because they will change per li
+      li.params.class = type; //Assign the type to the class, so the subtree will only have elements of this class
+      //Make sure that the context is available in details
+      details.treelink = li;
+      details.onclick = function () {
+        const ul = document.createElement('ul');
+        this.appendChild(ul);
+        this.onclick = null; //Only ones, the branch is loaded after the first call
+        this.treelink.params.uri = this.uri; //Transfer URI context to params
+        fetchBranch(this.treelink,ul);
+      }
+    });
+  } else {
+    //We need to transfer the context (table, query, params) to the tree, because actions on the tree cannot use the context via the async functions
+    tree.tablelink = table;
+    tree.query = query;
+    tree.params = params;
+    fetchBranch(tree, tree);
+  }
 }
 
 async function fetchBranch(tree, branch) {
@@ -31,8 +58,8 @@ async function fetchBranch(tree, branch) {
   }
   if ((parentstr!="") && (childrenstr!="")) {
     const treeQuery = (params.uri)
-      ? "SELECT ?uri (min(?lbl) as ?label) (count(distinct ?c) as ?count) WHERE {"+graphstr+"{"+parentstr+typestr+labelstr+" OPTIONAL {"+childrenstr+"}}} GROUP BY ?uri ORDER BY ?label"
-      : "SELECT ?uri (min(?lbl) as ?label) (count(distinct ?c) as ?count) WHERE {"+graphstr+"{"+typestr+labelstr+"FILTER NOT EXISTS {"+parentstr+ptypestr+"} OPTIONAL {"+childrenstr+"}}} GROUP BY ?uri ORDER BY ?label";
+      ? "SELECT ?uri (min(?lbl) as ?label) (count(distinct ?c) as ?count) WHERE {"+graphstr+"{"+parentstr+labelstr+" OPTIONAL {"+childrenstr+"}}} GROUP BY ?uri ORDER BY ?label"
+      : "SELECT ?uri (min(?lbl) as ?label) (count(distinct ?c) as ?count) WHERE {"+graphstr+"{"+typestr+labelstr+"FILTER NOT EXISTS {"+parentstr+"} OPTIONAL {"+childrenstr+"}}} GROUP BY ?uri ORDER BY ?label";
     const bindingsStream = await myFetcher.fetchBindings(endpointModule.getEndpoint(), treeQuery);
 
     bindingsStream.on('data', (bindings) => printTripleInTree(tree,branch,bindings));
@@ -50,7 +77,6 @@ function addAnchor(parent,tree,bindings,count) {
     anchor.onclick = function () {
       this.treelink.tablelink.innerHTML="";
       this.treelink.params.uri = this.uri; //Transfer URI context to params
-      //this.treelink.tablelink.graphuri = this.treelink.graphuri;
       fetchTriplesModule.fetchTriples(this.treelink.tablelink,this.treelink.query,this.treelink.params);
     }
   }
