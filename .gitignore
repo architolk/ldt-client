@@ -62,3 +62,4 @@ typings/
 
 # Webpack bundle
 dist/rdflib.js
+dist/rdflib.js.LICENSE.txt
