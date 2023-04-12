@@ -12,6 +12,6 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-u1OknCvxWvY5kfmNBILK2hRnQC3Pr17a+RTT6rIHI7NnikvbZlHgTPOOmMi466C8" crossorigin="anonymous"></script>
     <script>rdflib.addNav("LDT Client",["Types","Diagram","Table"])</script>
     <table class="table" id="table1"/>
-    <script>rdflib.fetchData(document.getElementById("table1"), 'SELECT * WHERE { GRAPH ?_graph { ?s ?p ?o }} LIMIT 100')</script>
+    <script>rdflib.fetchData(document.getElementById("table1"), 'SELECT ?place ?anthem ?flag WHERE { ?s a <http://dbpedia.org/ontology/Place>. ?s rdfs:label ?place FILTER (lang(?place)="en"). OPTIONAL {?s <http://dbpedia.org/property/anthem> ?anthem} ?s <http://dbpedia.org/property/imageFlag> ?flag } LIMIT 100')</script>
   </body>
 </html>

@@ -12,10 +12,12 @@ export async function fetchData(table, query, params) {
 function printHeader(table, variables) {
   const head = table.createTHead();
   const row = head.insertRow();
+  table.dataColumns = [];
   variables.forEach( function (variable) {
     if ((!variable.value.match(/_label$/)) && (!variable.value.match(/_graph$/)) && (!variable.value.match(/_link$/))) {
       const cell = row.appendChild(document.createElement("th"));
       cell.innerHTML = variable.value;
+      table.dataColumns.push(variable.value);
     }
   })
 }
@@ -29,10 +31,11 @@ function printData(table, bindings) {
   }
   const row = tbody.insertRow();
 
-  for (const variable in bindings) {
-    if ((!variable.match(/_label$/)) && (!variable.match(/_graph$/)) && (!variable.match(/_link$/))) {
-      const cell = row.insertCell();
-      const binding = bindings[variable];
+  table.dataColumns.forEach( function (variable) {
+    const cell = row.insertCell();
+    const binding = bindings[variable];
+
+    if (binding) {
       if (binding.termType=='NamedNode') {
         const labelBinding = bindings[variable+"_label"];
         var label = binding.value;
@@ -54,5 +57,5 @@ function printData(table, bindings) {
         cell.innerHTML = binding.value;
       }
     }
-  }
+  })
 }

@@ -12,6 +12,8 @@ npm start
 
 ## Building
 
+Change mode in `webpack.config.js` to 'production', and do:
+
 ```
 npm run build
 ```
