@@ -1,3 +1,4 @@
+/*
 import {SparqlEndpointFetcher} from "fetch-sparql-endpoint";
 import * as endpointModule from "./endpoint.js";
 import * as helperModule from "./helpers.js";
@@ -150,3 +151,4 @@ function addShapeToGraph(graph,uri) {
   }
   return shape
 }
+*/
