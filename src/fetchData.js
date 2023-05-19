@@ -14,7 +14,7 @@ function printHeader(table, variables) {
   const row = head.insertRow();
   table.dataColumns = [];
   variables.forEach( function (variable) {
-    if ((!variable.value.match(/_label$/)) && (!variable.value.match(/_graph$/)) && (!variable.value.match(/_link$/))) {
+    if ((!variable.value.match(/_label$/)) && (!variable.value.match(/_graph$/)) && (!variable.value.match(/_link$/)) && (!variable.value.match(/_glink$/))) {
       const cell = row.appendChild(document.createElement("th"));
       cell.innerHTML = variable.value;
       table.dataColumns.push(variable.value);
