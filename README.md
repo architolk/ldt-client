@@ -26,13 +26,15 @@ Copy all files from the [/dist](dist) folder (after the build is completed) to t
 
 - `_label` for labels of URI
 - `_graph` for graph of URI
-- `_link` for link to URI
+- `_link` for link to URI (starting with `/nav_`)
+- `_glink` for global link to URI
 
 ### Simple form (construct routine)
 
 - `rdfs:label` used for label of URI
 - `<urn:ldt:graph>` used for graph of URI
-- `<urn:ldt:link>` used for link to URI
+- `<urn:ldt:link>` used for link to URI (starting with `/nav_`)
+- `<urn:ldt:glink>` used for global link to URI
 
 ### Tree view
 

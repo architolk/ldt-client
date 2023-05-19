@@ -4,7 +4,10 @@ import * as helperModule from "./helpers.js";
 
 const labels = new Map();
 const links = new Map();
+const glinks = new Map();
 const graphs = new Map();
+
+const FullURLRegex = new RegExp("^[http|https]");
 
 function printHeader(table,title) {
   if (title) {
@@ -19,16 +22,21 @@ function printHeader(table,title) {
 }
 
 function getHRef(uri,link,graph) {
-  var olink = links.get(uri); //By default the link is the predicate, but if defined otherwise, use defined link
-  if (!olink) {
-    olink = link;
+  var glink = glinks.get(uri);
+  if (glink) {
+    return glink; //When a global link exists, override the local link
+  } else {
+    var olink = links.get(uri); //By default the link is the predicate, but if defined otherwise, use defined link
+    if (!olink) {
+      olink = link
+    }
+    var ograph = graphs.get(uri); //By default the graph is the given graph, but if defined otherwise, use defined graph
+    if (!ograph) {
+      ograph = graph;
+    }
+    const graphstr = ((ograph) ? "graph="+encodeURIComponent(ograph)+"&" : "");
+    return "nav_"+olink+".html?"+graphstr+"uri="+encodeURIComponent(uri)
   }
-  var ograph = graphs.get(uri); //By default the graph is the given graph, but if defined otherwise, use defined graph
-  if (!ograph) {
-    ograph = graph;
-  }
-  const graphstr = ((ograph) ? "graph="+encodeURIComponent(ograph)+"&" : "");
-  return "nav_"+olink+".html?"+graphstr+"uri="+encodeURIComponent(uri)
 }
 
 function getValue(object,link,graph) {
@@ -37,7 +45,9 @@ function getValue(object,link,graph) {
     if (!olabel) {
       olabel = object.value;
     }
-    return "<a name='"+object.value+"' href='"+getHRef(object.value,link,graph)+"'>" + olabel + "</a>"
+    const href = getHRef(object.value,link,graph);
+    const targetwin = ((FullURLRegex.test(href)) ? " target='_blank'" : "");
+    return "<a name='"+object.value+"' href='"+href+"'"+targetwin+">" + olabel + "</a>"
   } else {
     return object.value
   }
@@ -66,10 +76,21 @@ function printTriple(table, triple, params) {
   if (triple._predicate.value=="urn:ldt:link") {
     const objects = document.getElementsByName(triple._subject.value); //All anchors (<a href>) to a particular uri
     objects.forEach((obj) => {
-      obj.href = getHRef(triple._subject.value,triple._object.value,params.graph); //Change the label of the link to the actual label of the uri
+      obj.href = getHRef(triple._subject.value,triple._object.value,params.graph); //Change the label of the link to the actual label of the link-uri
     });
     //Add to map for further reference (so we will directly use the correct link, instead of the predicate)
     links.set(triple._subject.value,triple._object.value);
+  } else if (triple._predicate.value=="urn:ldt:glink") {
+    //Add to map for further reference (so we will directly use the correct global link, instead of the predicate)
+    glinks.set(triple._subject.value,triple._object.value);
+    const objects = document.getElementsByName(triple._subject.value); //All anchors (<a href>) to a particular uri
+    objects.forEach((obj) => {
+      const href = getHRef(triple._subject.value,null,params.graph);
+      obj.href =  href; //Change the the link to the actual link-uri (original link won't matter)
+      if (FullURLRegex.test(href)) {
+        obj.target = '_blank'
+      }
+    });
   } else if (triple._predicate.value=="urn:ldt:graph") {
     const objects = document.getElementsByName(triple._subject.value); //All anchors (<a href>) to a particular uri
     objects.forEach((obj) => {
@@ -83,13 +104,14 @@ function printTriple(table, triple, params) {
       printHeader(table,triple._object.value)
     }
     var row = document.getElementById(triple._predicate.value); //A row corresponds to a predicate
+    var keycode = triple._predicate.value.replace(/^.+(#|\/)(.+)$/,"$2");
     var keyterm = labels.get(triple._predicate.value);
     if (!keyterm) {
-      keyterm = triple._predicate.value.replace(/^.+(#|\/)(.+)$/,"$2");
+      keyterm = keycode;
     }
     if (row) {
       const valuecell = row.childNodes[1];
-      valuecell.innerHTML = valuecell.innerHTML + ", " + getValue(triple._object,keyterm,params.graph);
+      valuecell.innerHTML = valuecell.innerHTML + ", " + getValue(triple._object,keycode,params.graph);
     } else {
       var tbody;
       if (table.tBodies.length==0) {
@@ -107,7 +129,7 @@ function printTriple(table, triple, params) {
         keycell.innerHTML = keyterm; //Label of the predicate is the localname of the prediate (at first)
       }
       const valuecell = row.insertCell();
-      valuecell.innerHTML = getValue(triple._object,keyterm,params.graph);
+      valuecell.innerHTML = getValue(triple._object,keycode,params.graph);
     }
   }
   //Process other triples that are found

@@ -42,17 +42,22 @@ function printData(table, bindings) {
         if (labelBinding) {
           label = labelBinding.value;
         }
-        const linkBinding = bindings[variable+"_link"];
-        var link = variable;
-        if (linkBinding) {
-          link = linkBinding.value;
+        const glinkBinding = bindings[variable+"_glink"];
+        if (glinkBinding) {
+          cell.innerHTML = "<a href='"+glinkBinding.value+"' target='_blank'>" + label + "</a>";
+        } else {
+          const linkBinding = bindings[variable+"_link"];
+          var link = variable;
+          if (linkBinding) {
+            link = linkBinding.value;
+          }
+          var graphbinding = bindings[variable+"_graph"];
+          if (!graphbinding) {
+            graphbinding = bindings["_graph"];
+          }
+          const graphstr = (graphbinding ? "graph="+encodeURIComponent(graphbinding.value)+"&" : "");
+          cell.innerHTML = "<a href='nav_"+link+".html?"+graphstr+"uri="+encodeURIComponent(binding.value)+"'>" + label + "</a>";
         }
-        var graphbinding = bindings[variable+"_graph"];
-        if (!graphbinding) {
-          graphbinding = bindings["_graph"];
-        }
-        const graphstr = (graphbinding ? "graph="+encodeURIComponent(graphbinding.value)+"&" : "");
-        cell.innerHTML = "<a href='nav_"+link+".html?"+graphstr+"uri="+encodeURIComponent(binding.value)+"'>" + label + "</a>";
       } else {
         cell.innerHTML = binding.value;
       }
