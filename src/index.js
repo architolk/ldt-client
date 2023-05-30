@@ -27,7 +27,8 @@ export async function fetchTriples(table, query, params) {
 }
 
 export async function enableLinkCallback(enable) {
-  fetchTriplesModule.enableLinkCallback(enable)
+  fetchTriplesModule.enableLinkCallback(enable);
+  fetchDataModule.enableLinkCallback(enable)
 }
 
 export async function fetchTree(tree, table, query, params) {

@@ -2,6 +2,12 @@ import {SparqlEndpointFetcher} from "fetch-sparql-endpoint";
 import * as endpointModule from "./endpoint.js";
 import * as helperModule from "./helpers.js";
 
+var _enableLinkCallback = false;
+
+export function enableLinkCallback(enable) {
+  _enableLinkCallback = enable;
+}
+
 export async function fetchData(table, query, params) {
   const myFetcher = new SparqlEndpointFetcher();
   const bindingsStream = await myFetcher.fetchBindings(endpointModule.getEndpoint(), helperModule.replace(query,params));
@@ -55,8 +61,15 @@ function printData(table, bindings) {
           if (!graphbinding) {
             graphbinding = bindings["_graph"];
           }
-          const graphstr = (graphbinding ? "graph="+encodeURIComponent(graphbinding.value)+"&" : "");
-          cell.innerHTML = "<a href='nav_"+link+".html?"+graphstr+"uri="+encodeURIComponent(binding.value)+"'>" + label + "</a>";
+          if (!_enableLinkCallback) {
+            const graphstr = (graphbinding ? "graph="+encodeURIComponent(graphbinding.value)+"&" : "");
+            cell.innerHTML = "<a href='nav_"+link+".html?"+graphstr+"uri="+encodeURIComponent(binding.value)+"'>" + label + "</a>";
+          } else {
+            const graphstr = (graphbinding ? graphbinding.value : "");
+            cell.innerHTML = "<a href='#' rel='link_callback' href='#' onclick='link_callback()' data-link='nav_"
+                  +link+"' data-graphuri='"+graphstr+"' data-subjecturi='"+binding.value+"'>" + label + "</a>"
+
+          }
         }
       } else {
         cell.innerHTML = binding.value;
