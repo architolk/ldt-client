@@ -9,6 +9,12 @@ const graphs = new Map();
 
 const FullURLRegex = new RegExp("^[http|https]");
 
+var _enableLinkCallback = false;
+
+export function enableLinkCallback(enable) {
+  _enableLinkCallback = enable;
+}
+
 function printHeader(table,title) {
   if (title) {
     if (!table.tHead) {
@@ -21,10 +27,10 @@ function printHeader(table,title) {
   }
 }
 
-function getHRef(uri,link,graph) {
+function getLinkParams(uri,link,graph) {
   var glink = glinks.get(uri);
   if (glink) {
-    return glink; //When a global link exists, override the local link
+    return {link: glink}; //When a global link exists, override the local link
   } else {
     var olink = links.get(uri); //By default the link is the predicate, but if defined otherwise, use defined link
     if (!olink) {
@@ -34,8 +40,17 @@ function getHRef(uri,link,graph) {
     if (!ograph) {
       ograph = graph;
     }
-    const graphstr = ((ograph) ? "graph="+encodeURIComponent(ograph)+"&" : "");
-    return "nav_"+olink+".html?"+graphstr+"uri="+encodeURIComponent(uri)
+    return {uri: uri, link: olink, graph: ograph}
+  }
+}
+
+function getHRef(uri,link,graph) {
+  const linkParams = getLinkParams(uri,link,graph);
+  if (linkParams.uri) {
+    const graphstr = ((linkParams.graph) ? "graph="+encodeURIComponent(linkParams.graph)+"&" : "");
+    return "nav_"+linkParams.link+".html?"+graphstr+"uri="+encodeURIComponent(linkParams.uri)
+  } else {
+    return linkParams.link
   }
 }
 
@@ -45,9 +60,16 @@ function getValue(object,link,graph) {
     if (!olabel) {
       olabel = object.value;
     }
-    const href = getHRef(object.value,link,graph);
-    const targetwin = ((FullURLRegex.test(href)) ? " target='_blank'" : "");
-    return "<a name='"+object.value+"' href='"+href+"'"+targetwin+">" + olabel + "</a>"
+    if (!_enableLinkCallback) {
+      const href = getHRef(object.value,link,graph);
+      const targetwin = ((FullURLRegex.test(href)) ? " target='_blank'" : "");
+      return "<a name='"+object.value+"' href='"+href+"'"+targetwin+">" + olabel + "</a>"
+    } else {
+      const linkParams = getLinkParams(object.value,link,graph);
+      const graphstr = ((linkParams.graph) ? linkParams.graph : "");
+      return "<a name='"+object.value+"' rel='link_callback' href='#' onclick='link_callback()' data-link='nav_"
+            +linkParams.link+"' data-graphuri='"+graphstr+"' data-subjecturi='"+linkParams.uri+"'>" + olabel + "</a>"
+    }
   } else {
     return object.value
   }
@@ -76,7 +98,11 @@ function printTriple(table, triple, params) {
   if (triple._predicate.value=="urn:ldt:link") {
     const objects = document.getElementsByName(triple._subject.value); //All anchors (<a href>) to a particular uri
     objects.forEach((obj) => {
-      obj.href = getHRef(triple._subject.value,triple._object.value,params.graph); //Change the label of the link to the actual label of the link-uri
+      if (!_enableLinkCallback) {
+        obj.href = getHRef(triple._subject.value,triple._object.value,params.graph); //Change the label of the link to the actual label of the link-uri
+      } else {
+        obj['data-link'] = "nav_" + triple._object.value;
+      }
     });
     //Add to map for further reference (so we will directly use the correct link, instead of the predicate)
     links.set(triple._subject.value,triple._object.value);
@@ -85,17 +111,25 @@ function printTriple(table, triple, params) {
     glinks.set(triple._subject.value,triple._object.value);
     const objects = document.getElementsByName(triple._subject.value); //All anchors (<a href>) to a particular uri
     objects.forEach((obj) => {
-      const href = getHRef(triple._subject.value,null,params.graph);
-      obj.href =  href; //Change the the link to the actual link-uri (original link won't matter)
-      if (FullURLRegex.test(href)) {
-        obj.target = '_blank'
+      if (!_enableLinkCallback) {
+        const href = getHRef(triple._subject.value,null,params.graph);
+        obj.href =  href; //Change the the link to the actual link-uri (original link won't matter)
+        if (FullURLRegex.test(href)) {
+          obj.target = '_blank'
+        }
+      } else {
+        obj['data-link'] = triple._object.value;
       }
     });
   } else if (triple._predicate.value=="urn:ldt:graph") {
     const objects = document.getElementsByName(triple._subject.value); //All anchors (<a href>) to a particular uri
     objects.forEach((obj) => {
-      const olink = obj.href.replace(/^.*nav_(.+).html.*$/,"$1"); //Specific case: we need to find the original link again...
-      obj.href = getHRef(triple._subject.value,olink,triple._object.value); //Change the graph of the link to the actual graph of the uri
+      if (!_enableLinkCallback) {
+        const olink = obj.href.replace(/^.*nav_(.+).html.*$/,"$1"); //Specific case: we need to find the original link again...
+        obj.href = getHRef(triple._subject.value,olink,triple._object.value); //Change the graph of the link to the actual graph of the uri
+      } else {
+        obj['data-graphuri']= triple._object.value;
+      }
     });
     //Add to map for further reference (so we will directly use the correct graph, instead of the param graph)
     graphs.set(triple._subject.value,triple._object.value);
