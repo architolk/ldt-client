@@ -15,6 +15,15 @@ export function enableLinkCallback(enable) {
   _enableLinkCallback = enable;
 }
 
+function emptyGlobals() {
+  //Single page applications might falsly retain values in the global variables
+  //So we need to empty these globals - just to be sure!
+  labels.clear();
+  links.clear();
+  glinks.clear();
+  graphs.clear();
+}
+
 function printHeader(table,title) {
   if (title) {
     if (!table.tHead) {
@@ -78,6 +87,7 @@ function getValue(object,link,graph) {
 export async function fetchTriples(table, query, params) {
 
   if (params) {
+    emptyGlobals();
     printHeader(table,params.label);
 
     if (params.uri) {
