@@ -111,7 +111,7 @@ function printTriple(table, triple, params) {
       if (!_enableLinkCallback) {
         obj.href = getHRef(triple._subject.value,triple._object.value,params.graph); //Change the label of the link to the actual label of the link-uri
       } else {
-        obj['data-link'] = "nav_" + triple._object.value;
+        obj.setAttribute('data-link',"nav_" + triple._object.value);
       }
     });
     //Add to map for further reference (so we will directly use the correct link, instead of the predicate)
@@ -128,7 +128,7 @@ function printTriple(table, triple, params) {
           obj.target = '_blank'
         }
       } else {
-        obj['data-link'] = triple._object.value;
+        obj.setAttribute('data-link',triple._object.value);
       }
     });
   } else if (triple._predicate.value=="urn:ldt:graph") {
@@ -138,7 +138,7 @@ function printTriple(table, triple, params) {
         const olink = obj.href.replace(/^.*nav_(.+).html.*$/,"$1"); //Specific case: we need to find the original link again...
         obj.href = getHRef(triple._subject.value,olink,triple._object.value); //Change the graph of the link to the actual graph of the uri
       } else {
-        obj['data-graphuri']= triple._object.value;
+        obj.setAttribute('data-graphuri',triple._object.value);
       }
     });
     //Add to map for further reference (so we will directly use the correct graph, instead of the param graph)
