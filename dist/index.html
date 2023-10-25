@@ -38,7 +38,10 @@
     <script>rdflib.setEndpoint('https://dbpedia.org/sparql')</script>
   </head>
   <body>
-    <p>(<a href="bootstrap.html">bootstrap</a> version)</p>
+    <p>
+      <span>(<a href="bootstrap.html">bootstrap</a> version)</span>
+      <span>(all <a href="tests">tests</a>)</span>
+    </p>
     <p>Resultaten:</p>
     <table id="table1"/>
     <script>rdflib.fetchData(document.getElementById("table1"), 'SELECT ?s?p?o ("link" as ?s_link) WHERE { ?s ?p ?o } LIMIT @LIMIT@',{limit: '100'})</script>
