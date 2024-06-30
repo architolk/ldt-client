@@ -28,6 +28,7 @@ Copy all files from the [/dist](dist) folder (after the build is completed) to t
 - `_graph` for graph of URI
 - `_link` for link to URI (starting with `/nav_`)
 - `_glink` for global link to URI
+- `_query` for a query parameter (free to use for anything)
 
 ### Simple form (construct routine)
 

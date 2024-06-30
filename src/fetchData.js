@@ -77,13 +77,19 @@ function printData(table, bindings) {
           if (!graphbinding) {
             graphbinding = bindings["_graph"];
           }
+          var querybinding = bindings[variable+"_query"];
+          if (!querybinding) {
+            querybinding = bindings["_query"];
+          }
           if (!_enableLinkCallback) {
             const graphstr = (graphbinding ? "graph="+encodeURIComponent(graphbinding.value)+"&" : "");
-            cell.innerHTML = "<a href='nav_"+link+".html?"+graphstr+"uri="+encodeURIComponent(binding.value)+"'>" + label + "</a>";
+            const querystr = (querybinding ? "query="+encodeURIComponent(querybinding.value)+"&" : "");
+            cell.innerHTML = "<a href='nav_"+link+".html?"+graphstr+querystr+"uri="+encodeURIComponent(binding.value)+"'>" + label + "</a>";
           } else {
             const graphstr = (graphbinding ? graphbinding.value : "");
+            const querystr = (querybinding ? querybinding.value : "");
             cell.innerHTML = "<a href='#' rel='link_callback' href='#' onclick='link_callback()' data-link='nav_"
-                  +link+"' data-graphuri='"+graphstr+"' data-subjecturi='"+binding.value+"'>" + label + "</a>"
+                  +link+"' data-graphuri='"+graphstr+querystr+"' data-subjecturi='"+binding.value+"'>" + label + "</a>"
 
           }
         }
