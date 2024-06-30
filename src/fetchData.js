@@ -3,19 +3,34 @@ import * as endpointModule from "./endpoint.js";
 import * as helperModule from "./helpers.js";
 
 var _enableLinkCallback = false;
+var _spinnerShowing = false;
 
 export function enableLinkCallback(enable) {
   _enableLinkCallback = enable;
 }
 
 export async function fetchData(table, query, params) {
+  showSpinner(table);
   const myFetcher = new SparqlEndpointFetcher();
   const bindingsStream = await myFetcher.fetchBindings(endpointModule.getEndpoint(), helperModule.replace(query,params));
   bindingsStream.on('variables', (variables) => printHeader(table, variables));
   bindingsStream.on('data', (bindings) => printData(table, bindings));
 }
 
+function showSpinner(table) {
+  _spinnerShowing = true;
+  table.innerHTML = "<div class='d-flex justify-content-center'><div class='spinner-border m-5' role='status'></div></div>";
+}
+
+function removeSpinner(table) {
+  if (_spinnerShowing) {
+    _spinnerShowing = false;
+    table.innerHTML = "";
+  }
+}
+
 function printHeader(table, variables) {
+  removeSpinner(table);
   const head = table.createTHead();
   const row = head.insertRow();
   table.dataColumns = [];
@@ -29,6 +44,7 @@ function printHeader(table, variables) {
 }
 
 function printData(table, bindings) {
+  removeSpinner(table);
   var tbody;
   if (table.tBodies.length==0) {
     tbody = table.createTBody();
