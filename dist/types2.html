@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>LDT Client</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-iYQeCzEYFbKjA/T2uDLTpkwGzCiq6soy8tYaI1GyVh/UjpbCx/TYkiZhlZB6+fzT" crossorigin="anonymous">
+    <link href="tree.css" rel="stylesheet">
+    <script src="rdflib.js"></script>
+    <script>rdflib.setEndpoint('https://dbpedia.org/sparql')</script>
+    </head>
+  <body>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-u1OknCvxWvY5kfmNBILK2hRnQC3Pr17a+RTT6rIHI7NnikvbZlHgTPOOmMi466C8" crossorigin="anonymous"></script>
+    <script>rdflib.addNav("LDT Client",["Types","Properties"])</script>
+    <div class="container-fluid">
+      <div class="row">
+        <div class="col-3 scrollable"><ul class="tree" id="tree1"/></div>
+        <div class="col"><table class="table" id="table1"/></div>
+      </div>
+    </div>
+    <script>
+      const graphuri="http://dbpedia.org/resource/classes#";
+      const classuri="http://www.w3.org/2002/07/owl#Class";
+      const propuri="http://www.w3.org/2000/01/rdf-schema#subClassOf";
+      rdflib.fetchTreeCB(document.getElementById("tree1"),{graph:graphuri,class:classuri,upper:propuri},(params) => {
+        const table1 = document.getElementById("table1");
+        table1.innerHTML = "";
+        rdflib.fetchTriples(table1,"CONSTRUCT {<@URI@> ?p ?o. ?p rdfs:label ?p_label. ?o rdfs:label ?o_label} WHERE { GRAPH <@GRAPH@> {<@URI@> ?p ?o OPTIONAL {?p rdfs:label ?p_label} OPTIONAL {?o rdfs:label ?o_label}}}",params);
+      })
+    </script>
+    </body>
+</html>

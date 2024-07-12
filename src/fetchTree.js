@@ -2,6 +2,41 @@ import {SparqlEndpointFetcher} from "fetch-sparql-endpoint";
 import * as endpointModule from "./endpoint.js";
 import * as fetchTriplesModule from './fetchTriples.js';
 
+// TODO: The code of fetchTreeCB and fetchTree are almost identical. fetchTree should be deprecated as fetchTreeCB is more flexible
+//       Another option is to incorporate fetchTree as a way of calling fetchTreeCB
+export async function fetchTreeCB(tree, params, callback) {
+
+  if (params.types) {
+    params.types.forEach((type) => {
+      const li = document.createElement('li');
+      tree.appendChild(li);
+      const details = document.createElement('details');
+      li.appendChild(details);
+      const summary = document.createElement('summary');
+      details.appendChild(summary);
+      summary.innerHTML = type.replace(/^.+(#|\/)(.+)$/,"$2");
+      //We need to transfer the context (table, query, params) to the subtree, because actions on the tree cannot use the context via the async functions
+      li.callback = callback;
+      li.params = Object.assign({},params); //Copy of the params, because they will change per li
+      li.params.class = type; //Assign the type to the class, so the subtree will only have elements of this class
+      //Make sure that the context is available in details
+      details.treelink = li;
+      details.onclick = function () {
+        const ul = document.createElement('ul');
+        this.appendChild(ul);
+        this.onclick = null; //Only ones, the branch is loaded after the first call
+        this.treelink.params.uri = this.uri; //Transfer URI context to params
+        fetchBranch(this.treelink,ul);
+      }
+    });
+  } else {
+    //We need to transfer the context (table, query, params) to the tree, because actions on the tree cannot use the context via the async functions
+    tree.callback = callback;
+    tree.params = params;
+    fetchBranch(tree, tree);
+  }
+}
+
 export async function fetchTree(tree, table, query, params) {
 
   if (params.types) {
@@ -78,6 +113,14 @@ function addAnchor(parent,tree,bindings,count) {
       this.treelink.tablelink.innerHTML="";
       this.treelink.params.uri = this.uri; //Transfer URI context to params
       fetchTriplesModule.fetchTriples(this.treelink.tablelink,this.treelink.query,this.treelink.params);
+    }
+  }
+  if (tree.callback) {
+    anchor.uri = bindings['uri'].value;
+    anchor.treelink = tree;
+    anchor.onclick = function () {
+      this.treelink.params.uri = this.uri;
+      this.treelink.callback(this.treelink.params);
     }
   }
 }

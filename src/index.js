@@ -4,7 +4,6 @@ import * as fetchValueModule from './fetchValue.js';
 import * as navModule from './nav.js';
 import * as fetchTriplesModule from './fetchTriples.js';
 import * as fetchTreeModule from './fetchTree.js';
-//import * as diagramModule from './diagram.js';
 
 export function addNav(title, menu) {
   navModule.addNav(title,menu)
@@ -35,8 +34,6 @@ export async function fetchTree(tree, table, query, params) {
   fetchTreeModule.fetchTree(tree,table,query,params)
 }
 
-/*
-export async function createDiagram(canvas, query, params) {
-  diagramModule.createDiagram(canvas,query,params)
+export async function fetchTreeCB(tree, params, callback) {
+  fetchTreeModule.fetchTreeCB(tree, params, callback)
 }
-*/
