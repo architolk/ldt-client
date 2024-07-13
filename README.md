@@ -69,6 +69,10 @@ Copy all files from the [/dist](dist) folder (after the build is completed) to t
     - a parameter `class` can be used to filter the objects in the list
     - a parameter `types` can be used to create subtrees per type. This is an array of classes that are use for each individual subtree.
     - a parameter `uri` can be used for the top element of the tree. If no uri is given, all elements without a parent are shown in te tree.
+- fetchTreeCB(DOMElement-tree,params,callback)
+  - DOMElement-tree: the tree in which the data is presented
+  - params: same as in fetchTree
+  - callback: a function with one parameter that will contain the params, typically something like `(params) => {}`. The callback function is called when an item is selected in the tree. The params.uri value will contain the uri of the selected element.
 - createDiagram(DOMElement,query,parameter)
   - DOMElement: the canvas to draw the diagram on. The canvas will be the full width and height of the parent DOM element.
   - query: CONSTRUCT query to create the diagram elements. Diagram elements will be placed in the middle of the canvas.
