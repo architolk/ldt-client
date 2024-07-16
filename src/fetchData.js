@@ -3,7 +3,6 @@ import * as endpointModule from "./endpoint.js";
 import * as helperModule from "./helpers.js";
 
 var _enableLinkCallback = false;
-var _spinnerShowing = false;
 
 export function enableLinkCallback(enable) {
   _enableLinkCallback = enable;
@@ -18,13 +17,13 @@ export async function fetchData(table, query, params) {
 }
 
 function showSpinner(table) {
-  _spinnerShowing = true;
+  table.spinnerShowing = true;
   table.innerHTML = "<div class='d-flex justify-content-center'><div class='spinner-border m-5' role='status'></div></div>";
 }
 
 function removeSpinner(table) {
-  if (_spinnerShowing) {
-    _spinnerShowing = false;
+  if (table.spinnerShowing) {
+    table.spinnerShowing = false;
     table.innerHTML = "";
   }
 }

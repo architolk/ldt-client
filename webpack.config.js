@@ -2,7 +2,7 @@ const path = require('path');
 const NodePolyfillPlugin = require("node-polyfill-webpack-plugin")
 
 module.exports = {
-  mode: 'development', // development | production
+  mode: 'production', // development | production
   entry: './src/index.js',
   devtool: 'inline-source-map',
   devServer: {
