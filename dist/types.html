@@ -21,7 +21,7 @@
     <script>
       const graphuri="http://dbpedia.org/resource/classes#";
       const classuri="http://www.w3.org/2002/07/owl#Class";
-      const propuri="http://www.w3.org/2000/01/rdf-schema#subClassOf";
+      const propuri=["http://www.w3.org/2000/01/rdf-schema#subClassOf","http://www.w3.org/2000/01/rdf-schema#subClassOf2"];
       rdflib.fetchTree(document.getElementById("tree1"),document.getElementById("table1"),"CONSTRUCT {<@URI@> ?p ?o. ?p rdfs:label ?p_label. ?o rdfs:label ?o_label} WHERE { GRAPH <@GRAPH@> {<@URI@> ?p ?o OPTIONAL {?p rdfs:label ?p_label} OPTIONAL {?o rdfs:label ?o_label}}}",{graph:graphuri,class:classuri,upper:propuri})
     </script>
     </body>

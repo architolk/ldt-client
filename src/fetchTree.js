@@ -83,12 +83,36 @@ async function fetchBranch(tree, branch) {
   var parentstr = "";
   var childrenstr = "";
   if (params.upper) {
-    parentstr = (params.uri) ? "?uri <"+params.upper+"> <"+params.uri+">." : "?uri <"+params.upper+"> ?p.";
-    childrenstr = "?c <"+params.upper+"> ?uri.";
+    var predicate = "";
+    if (params.upper instanceof Array) {
+      params.upper.forEach((item) => {
+        if (predicate.length!=0) {
+          predicate = predicate + " | ";
+        }
+        predicate = predicate + "<" + item + ">";
+      });
+      predicate = "(" + predicate + ")";
+    } else {
+      predicate = "<" + params.upper + ">";
+    }
+    parentstr = (params.uri) ? "?uri "+predicate+" <"+params.uri+">." : "?uri "+predicate+" ?p.";
+    childrenstr = "?c "+predicate+" ?uri.";
   } else {
     if (params.lower) {
-      parentstr = (params.uri)? "<"+params.uri+"> <"+params.lower+"> ?uri." : "?p <"+params.lower+"> ?uri.";
-      childrenstr = "?uri <"+params.lower+"> ?c.";
+      var predicate = "";
+      if (params.lower instanceof Array) {
+        params.lower.forEach((item) => {
+          if (predicate.length!=0) {
+            predicate = predicate + " | ";
+          }
+          predicate = predicate + "<" + item + ">";
+        });
+        predicate = "(" + predicate + ")";
+      } else {
+        predicate = "<" + params.lower + ">";
+      }
+      parentstr = (params.uri)? "<"+params.uri+"> "+predicate+" ?uri." : "?p "+predicate+" ?uri.";
+      childrenstr = "?uri "+predicate+" ?c.";
     }
   }
   if ((parentstr!="") && (childrenstr!="")) {

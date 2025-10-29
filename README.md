@@ -39,6 +39,8 @@ Copy all files from the [/dist](dist) folder (after the build is completed) to t
 
 ### Tree view
 
+The treeview itself doesn't work with a query, but parameters. The query-param is actually a simple form query (see below).
+
 ## API
 
 - fetchValue(value,query,params,callback)
@@ -64,8 +66,8 @@ Copy all files from the [/dist](dist) folder (after the build is completed) to t
   - query: CONSTRUCT-query string. Used for a fetchTriples within the tree. Should have a `@URI@` parameter
   - parameters: JSON object containing parameters, for example: `{uri:'urn:foo'}`
     - a parameter `label` is used for the label in the tree, default is `rdfs:label`
-    - a parameter `upper` is used for the property higher in the tree
-    - a parameter `lower` is used for the property lower in the tree (one of these should be present)
+    - a parameter `upper` is used for the property (or array of properties) higher in the tree
+    - a parameter `lower` is used for the property (or array of properties) lower in the tree (one of these should be present)
     - a parameter `class` can be used to filter the objects in the list
     - a parameter `types` can be used to create subtrees per type. This is an array of classes that are use for each individual subtree.
     - a parameter `uri` can be used for the top element of the tree. If no uri is given, all elements without a parent are shown in te tree.
